@@ -30,6 +30,25 @@ public class Blind03_Trees {
         return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
     }
 
+    private static int maxDepth2(TreeNode root) {
+        if (root == null) return 0;
+        int level = 0;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            int cnt = queue.size();
+            for (int i = 0; i < cnt; i++) {
+                TreeNode node = queue.poll();
+                if (node != null) {
+                    if (node.left != null) queue.offer(node.left);
+                    if (node.right != null) queue.offer(node.right);
+                }
+            }
+            level++;
+        }
+        return level;
+    }
+
     private static int diameterOfBinaryTree(TreeNode root) {
         int[] a = new int[1];
         diameterOfBinaryTree_dfs(root, a);
@@ -113,5 +132,23 @@ public class Blind03_Trees {
             res.add(level);
         }
         return res;
+    }
+
+    private static List<Integer> rightSideView(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        List<Integer> list = new ArrayList<>();
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            int cnt = queue.size();
+            for (int i = 0; i < cnt; i++) {
+                TreeNode node = queue.poll();
+                if (node != null) {
+                    if (node.left != null) queue.offer(node.left);
+                    if (node.right != null) queue.offer(node.right);
+                    if (i == cnt - 1) list.add(node.val);
+                }
+            }
+        }
+        return list;
     }
 }
