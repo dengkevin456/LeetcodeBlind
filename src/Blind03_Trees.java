@@ -1,7 +1,9 @@
 import java.util.*;
 public class Blind03_Trees {
     public static void main(String[] args) {
-
+        TreeNode node = buildTree(new int[]{3, 9, 20, 15, 7},
+                new int[]{9, 3, 15, 20, 7});
+        levelOrderCheck(node);
     }
 
     public TreeNode invertTree(TreeNode root) {
@@ -112,6 +114,7 @@ public class Blind03_Trees {
         return null;
     }
 
+    // Level order traversal of a binary tree
     private static List<List<Integer>> levelOrder(TreeNode root) {
         List<List<Integer>> res = new ArrayList<>();
         if (root == null) return res;
@@ -150,5 +153,106 @@ public class Blind03_Trees {
             }
         }
         return list;
+    }
+
+    static class TreeNodeData {
+        TreeNode node;
+        int ans = 0;
+        public TreeNodeData(TreeNode node, int ans) {
+            this.node = node;
+            this.ans = ans;
+        }
+    }
+
+    private static int goodNodes(TreeNode root) {
+        Queue<TreeNodeData> queue = new LinkedList<>();
+        int ans = 0;
+        queue.offer(new TreeNodeData(root, Integer.MIN_VALUE));
+        while (!queue.isEmpty()) {
+            TreeNodeData data = queue.poll();
+            TreeNode node = data.node;
+            int maxVal = data.ans;
+            if (data.node.val >= maxVal) ans++;
+            if (node.left != null) {
+                queue.offer(new TreeNodeData(node.left, Math.max(node.val, maxVal)));
+            }
+            if (node.right != null) {
+                queue.offer(new TreeNodeData(node.right, Math.max(node.val, maxVal)));
+            }
+        }
+        return ans;
+    }
+
+    private static boolean isValidBST(TreeNode root) {
+        return isValidBST(root, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    private static boolean isValidBST(TreeNode root, long left, long right) {
+        if (root == null) return true;
+        if (!(left < root.val && root.val < right)) return false;
+        return isValidBST(root.left, left, root.val) && isValidBST(root.right, root.val, right);
+    }
+
+    private static int kthSmallest(TreeNode root, int k) {
+        Stack<TreeNode> stack = new Stack<>();
+        TreeNode node = root;
+        while (!stack.isEmpty() || node != null) {
+            while (node != null) {
+                stack.push(node);
+                node = node.left;
+            }
+            node = stack.pop();
+            k--;
+            if (k == 0) return node.val;
+            node = node.right;
+        }
+        return -1;
+    }
+
+    private static void levelOrderCheck(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
+            System.out.println(node.val);
+            if (node.left != null) {
+                queue.offer(node.left);
+            }
+            if (node.right != null) {
+                queue.offer(node.right);
+            }
+        }
+    }
+
+    private static TreeNode buildTree(int[] preorder, int[] inorder) {
+        int[] preidx = {0};
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < inorder.length; i++) {
+            map.put(inorder[i], i);
+        }
+        return buildTree_dfs(preorder, 0, inorder.length - 1, preidx, map);
+    }
+    private static TreeNode buildTree_dfs(int[] preorder, int l, int r, int[] preidx, Map<Integer, Integer> map) {
+        if (l > r) return null;
+        TreeNode root = new TreeNode(preorder[preidx[0]++]);
+        int mid = map.get(root.val);
+        root.left = buildTree_dfs(preorder, l, mid - 1, preidx, map);
+        root.right = buildTree_dfs(preorder, mid + 1, r, preidx, map);
+        return root;
+    }
+
+    private static int maxPathSum(TreeNode root) {
+        int[] res = new int[root.val];
+        return maxPathSumDFS(root, res);
+    }
+
+    private static int maxPathSumDFS(TreeNode root, int[] res) {
+        if (root == null) return 0;
+        // Get maximum path sum without the split
+        int leftMax = Math.max(maxPathSumDFS(root.left, res), 0);
+        int rightMax = Math.max(maxPathSumDFS(root.right, res), 0);
+        // Max path with split
+        res[0] = Math.max(res[0], root.val + leftMax + rightMax);
+        return root.val + Math.max(leftMax, rightMax);
     }
 }
